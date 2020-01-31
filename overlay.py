@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 def overlay(img_name): # input is a string of the image (ex: 'example.jpg')
-    img = overlay(cv2.imread(img_name)) # holds the image
+    img = cv2.imread(img_name) # holds the image
     cap = cv2.VideoCapture(0)
     # the 3 and 4 are supposed to be held by constants made by openCV, but VS didn't show me that stuff so yeah
     cap.set(3, 9999) # sets width of camera screen to max
