@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 
+# KNOWN BUG(S):
+#   - If a button is pressed before launching the camera window, no button is responsive. The program then must be manually stopped.
+#   - If a button is held during the function, the screen will freeze, but will go back to normal after releasing.
+
 def overlay(img_name): # input is a string of the image (ex: 'example.jpg')
     img = cv2.imread(img_name) # holds the image
     cap = cv2.VideoCapture(0)
@@ -14,7 +18,7 @@ def overlay(img_name): # input is a string of the image (ex: 'example.jpg')
     scalar = 1.0 # how much to resize 'img' to fit the cam screen
     if float(v_height / v_width) > float(i_height / i_width): # ratio-wise, camera screen is taller than 'img'
         scalar = float(v_width / i_width)
-    else:                                                     # ratio-wise, c.s. wider or equal to 'img'
+    else:                                                     # ratio-wise, camera screen is wider or equal to 'img'
         scalar = float(v_height / i_height)
     i_width  *= scalar # resizes width of 'img'
     i_height *= scalar # above for height
@@ -24,12 +28,24 @@ def overlay(img_name): # input is a string of the image (ex: 'example.jpg')
     x_offset = int((v_width - i_width) / 2)   # to get the 'img' in the middle of the screen
     y_offset = int((v_height - i_height) / 2) # above for height
     bg[y_offset:y_offset+img.shape[0], x_offset:x_offset+img.shape[1]] = img # puts 'img' on top of 'bg'; 'img' no longer needed as 'bg' takes its place
-
+    
+    doOverlay = False
     while (True):
         _, frame = cap.read() # gets each frame of camera
-        result = cv2.addWeighted(bg, 0.3, frame, 1, 0) # overlays 'bg' over 'frame'
+        key = cv2.waitKey(1) & 0xFF # gets key pressed
+
+        if key == ord('o'): # press 'o' to toggle overlayed image
+            if doOverlay: 
+                doOverlay = False
+            else: 
+                doOverlay = True
+        if doOverlay:
+            result = cv2.addWeighted(bg, 0.3, frame, 1, 0) # overlays 'bg' over 'frame'
+        else:
+            result = frame                                 # overlays nothing; purely what the camera captures
+
         cv2.imshow('overlay', result) # shows 'result' in window 'overlay'
-        if cv2.waitKey(1) & 0xFF == ord('q'): # press 'q' to quit
+        if key == ord('q'): # press 'q' to quit
             break
 
     cap.release()
